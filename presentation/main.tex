@@ -1,0 +1,597 @@
+\documentclass[aspectratio=169]{beamer}
+\usetheme{metropolis}
+
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\title{AI-Assisted Research Workflows with Claude Code \& MCP}
+\subtitle{(One Opinionated and Suboptimal Setup)}
+\author{Chris Schmitz}
+\date{13.2.26}
+
+% -----------------------------------------------
+% Agenda slide command: \agenda{highlighted item number}
+% -----------------------------------------------
+\newcommand{\agendaentry}[3]{%
+  % #1 = current section, #2 = this item number, #3 = item text
+  \ifnum#1=#2
+    \textbf{#2.\ #3}%
+  \else
+    \textcolor{gray}{#2.\ #3}%
+  \fi
+}
+\newcommand{\agenda}[1]{%
+  \begin{frame}{Agenda}
+    \agendaentry{#1}{1}{Demo}\par\bigskip
+    \agendaentry{#1}{2}{Claude Code \& MCP}\par\bigskip
+    \agendaentry{#1}{3}{Workspace, Design \& Architecture}\par\bigskip
+    \agendaentry{#1}{4}{The Four Tools}\par\bigskip
+    \agendaentry{#1}{5}{Setting up CLAUDE.md, Specs, and MCP Servers}\par\bigskip
+    \agendaentry{#1}{6}{Summary, Next Steps, Getting Started}
+  \end{frame}
+}
+
+\begin{document}
+
+\maketitle
+
+% ===============================================
+% Session Overview
+% ===============================================
+\begin{frame}{Session Overview}
+  What this session covers:
+  \begin{itemize}
+    \item A live demo of a few workflows in my workspace
+    \item What Claude Code and MCP are, and why they matter
+    \item How my workspace is structured and the design principles behind it
+    \item Brief intro to each of four tools: Obsidian, Zotero, LaTeX/Overleaf, Google Docs
+    \item How you manage context, set rules and workflows
+    \item Live tutorial of setting most of this up
+  \end{itemize}
+\end{frame}
+
+% -----------------------------------------------
+\begin{frame}{Session Overview --- Prerequisites}
+  \textbf{To follow along with the first half, you'll need:}
+  \begin{itemize}
+    \item VS Code
+    \item Claude Code (requires an Anthropic API subscription) --- if you don't have it installed but do have the subscription, that's fine
+  \end{itemize}
+
+  \vspace{1em}
+  \textbf{To follow the second half, you'll also need:}
+  \begin{itemize}
+    \item Accounts/installations for each tool you want to connect (Obsidian, Zotero, Google Cloud project for Docs, GitHub and Overleaf for LaTeX)
+    \item For Zotero MCP: Python and uv
+    \item For Obsidian and Google Docs MCP: Node.js (which includes \texttt{npm} and \texttt{npx})
+  \end{itemize}
+
+  \vspace{0.5em}
+  The second half is primarily a walkthrough and you shouldn't try to build along live. Claude and I wrote a detailed setup guide so you can replicate everything afterwards.
+\end{frame}
+
+% -----------------------------------------------
+\begin{frame}{Session Overview --- What You Will Leave With}
+  \begin{itemize}
+    \item Claude Code running in VS Code
+    \item A workspace folder with the right structure, spec files, and CLAUDE.md
+    \item A \texttt{.mcp.json} with placeholder entries ready for your connections
+    \item Understanding of how to set up the integrations you need
+    \item A mental model of the architecture/design of an agent context for knowledge work
+  \end{itemize}
+\end{frame}
+
+% ===============================================
+% 1. Demo
+% ===============================================
+\agenda{1}
+
+\begin{frame}{Demo}
+  \begin{itemize}
+    \item Democratic deliberation project
+    \item Obsidian note classification
+    \item A google docs demo if time
+  \end{itemize}
+\end{frame}
+
+% ===============================================
+% Key Takeaways (framing slide before concepts)
+% ===============================================
+\begin{frame}{Key Takeaways --- What Is vs.\ Isn't Important}
+  \textbf{Important:}
+  \begin{itemize}
+    \item Workspace and context management
+    \item MCP: exposing tools to an agentic system
+  \end{itemize}
+
+  \vspace{1em}
+  \textbf{Not important:}
+  \begin{itemize}
+    \item Claude Code specifically vs.\ any other agentic system
+    \item Exact setup of integrations --- this will get consumerized pretty soon
+    \item My exact workspace setup, which is definitely not optimal and changes daily
+  \end{itemize}
+
+  \vspace{0.5em}
+  (That said, at the end there's detailed setup instructions + a downloadable template if you just want this exact workspace.)
+\end{frame}
+
+% ===============================================
+% 2. Claude Code & MCP
+% ===============================================
+\agenda{2}
+
+\begin{frame}{What Is Claude Code?}
+  \begin{itemize}
+    \item Anthropic's CLI/VS Code tool for agentic AI assistance.
+    \item It can read \& write files, run shell commands, and call external tools.
+    \item This is equivalent to roughly anything you can do in a folder on your computer, plus whatever the connected tools allow it to do.
+    \item \emph{Our goal today is creating one folder and set of tools in which that's incredibly useful.}
+  \end{itemize}
+\end{frame}
+
+% -----------------------------------------------
+\begin{frame}{What Is Claude Code? --- Portability}
+  \textbf{It is not the only option.} Any MCP-compatible client works: Cursor, Windsurf, ChatGPT desktop, Gemini CLI, Claude Cowork\ldots\ The workspace we build today is portable across all of them, including all integrations. If you want to switch, just stop using Claude Code and start using something else.
+\end{frame}
+
+% -----------------------------------------------
+\begin{frame}{What Is Claude Code? --- Live}
+  \begin{itemize}
+    \item Open VS Code
+    \item Create a folder (e.g., \texttt{research-workspace/})
+    \item Open the VS Code terminal (\texttt{Ctrl+`}, drag up from bottom of screen, or View $\rightarrow$ Terminal)
+    \item Quick terminal orientation:
+    \begin{itemize}
+      \item \texttt{cd folder-name} --- move into a folder
+      \item \texttt{cd ..} --- move up one level
+      \item \texttt{ls} (Mac/Linux) or \texttt{dir} (Windows) --- list files
+      \item \texttt{mkdir folder-name} --- create a folder
+      \item You can also just use the VS Code file explorer for most of this
+    \end{itemize}
+    \item Install the Claude Code extension from the extensions tab in the left sidebar and authenticate
+    \item Open the Claude Code panel (Ctrl+Shift+P $\rightarrow$ ``Claude Code: Open'', or click the orange button)
+    \item Verify it's working: type ``Hello, what directory are we in?''
+  \end{itemize}
+\end{frame}
+
+% -----------------------------------------------
+\begin{frame}{What Is Claude Code? --- Two Things to Know}
+  \begin{itemize}
+    \item It will \emph{ask for permission} for anything it tries to do by default. With Shift+Tab (in the VS Code extension), you can let it run automatically. Even then you'll have to allow each new type of action once.
+    \item You can highlight parts of files to give Claude Code as context. If you don't, it reads whatever file you have open. You can also hide that --- in that case it starts with just your CLAUDE.md.
+  \end{itemize}
+
+  \vspace{0.5em}
+  That's the basics! Play around with CC: make it create folders, paste some text into a file in this folder and ask for comments in it, etc.
+
+\end{frame}
+
+% -----------------------------------------------
+\begin{frame}{What Is MCP?}
+  MCP (Model Context Protocol) is an open protocol that connects AI agents to external tools and data.
+
+  \vspace{0.5em}
+  \textbf{Architecture:}
+  \textbf{Client} (Claude Code, Cursor, etc.) $\leftrightarrow$ \textbf{Server} (Obsidian, Zotero, Google Docs, \ldots)
+
+  \vspace{0.5em}
+  Each server exposes a set of tools the client can call.
+\end{frame}
+
+% -----------------------------------------------
+\begin{frame}{What Is MCP? --- Mental Model}
+  \begin{itemize}
+    \item You have some sort of program (google docs, obsidian, \ldots) that has some sort of programmatic interface (analogous to a website/GUI for humans)
+    \item An MCP server wraps that interface into a list of callable \texttt{tools} for Claude
+    \item These tools have intuitive names and functions, e.g.\ the google docs server has a tool called \texttt{replaceDocumentContentWithMarkdown}
+    \item Claude sees this list of tools and chooses to use them if relevant while completing a task
+    \item MCP is a standard for how those tools are listed and exposed to models.
+  \end{itemize}
+
+  \vspace{0.5em}
+  There is one short file in each workspace called exactly \texttt{.mcp.json} where you list every server Claude has access to. These servers set what tools to offer.
+\end{frame}
+
+% -----------------------------------------------
+\begin{frame}{What Is MCP? --- Modularity}
+  \textbf{Modularity is the key insight:}
+  \begin{itemize}
+    \item Add a server $\rightarrow$ the agent gains new capabilities.
+    \item Remove a server $\rightarrow$ nothing else breaks.
+    \item Swap the client (e.g. Claude Code to Codex) $\rightarrow$ your servers and config still work.
+    \item MCP servers have to be built by someone, and usually you can find them online. I did for all of mine.
+  \end{itemize}
+
+  \vspace{0.5em}
+  Example: if you use \textbf{Notion} instead of Obsidian, just swap the Obsidian MCP server for a Notion one. Everything else stays.
+\end{frame}
+
+% ===============================================
+% 3. Workspace, Design & Architecture
+% ===============================================
+\agenda{3}
+
+\begin{frame}[fragile]{My Workspace (1/2): Setup}
+\begin{verbatim}
+research/
++-- CLAUDE.md            <- Agent instructions -- read every conversation
++-- .mcp.json            <- MCP server config -- read on startup
++-- LATEX_SPEC.md        <- LaTeX conventions -- only for LaTeX tasks
++-- OBSIDIAN_SPEC.md     <- Note classification -- only for Obsidian
++-- PROJECTS_SPEC.md     <- Project entry format -- only when updating
++-- PROJECTS.md          <- Project registry
+|
++-- projects/            <- Papers and articles, mostly LaTeX
+|                          (each own git repo -> GitHub -> Overleaf)
++-- zotero/exports/      <- Read-only Zotero library exports (.bib, .json)
+|
++-- implementation/      <- Custom scripts & services (not relevant today)
+\end{verbatim}
+\end{frame}
+
+% -----------------------------------------------
+\begin{frame}{My Workspace (2/2): Connected Tools}
+  \textbf{Connected tools (via MCP):}
+  \begin{itemize}
+    \item \textbf{Obsidian} --- knowledge base: meeting notes, paper summaries, project planning, idea sketches
+    \item \textbf{Zotero} --- reference manager: \textasciitilde500 papers, semantic search, annotations, citation export
+    \item \textbf{Google Docs} --- reading and writing docs and sheets incl.\ comments
+  \end{itemize}
+
+  \vspace{1em}
+  \textbf{Built-in (no MCP needed):}
+  \begin{itemize}
+    \item \textbf{LaTeX / Overleaf} --- Claude Code reads/writes \texttt{.tex} and \texttt{.bib} files directly, uses git to sync with Overleaf
+    \item \textbf{Git / GitHub} --- built into Claude Code's shell tools
+  \end{itemize}
+\end{frame}
+
+% -----------------------------------------------
+\begin{frame}{Design Principles (Most important slide!)}
+  \begin{enumerate}
+    \item \textbf{One workspace.} All context for all projects. I could set up a separate workspace for each project. Currently I think being able to draw on stuff across projects is better (e.g., ``I'm pretty sure I cited some explainability stuff in my oversight paper, add those same citations here''), but maybe I'm wrong.
+
+    \item \textbf{Good guidance.} These agents are hungry for context and will, if not steered, read all kinds of stuff, burning through your rate limit or budget.
+    \begin{itemize}
+      \item Modular specs keep them on track.
+      \item A source-of-truth list of projects is helpful for quick context. The most important part is consistent project identifiers, e.g.\ \texttt{flooding}, used everywhere.
+    \end{itemize}
+
+    \item \textbf{Everything version-controlled separately.} All projects/files have individual version tracking: (a) in Google Docs, (b) in a git repo, (c) in Obsidian, or (d) in Zotero. No files ``live'' primarily in the research workspace, and the workspace is not version-controlled as a monolith.
+  \end{enumerate}
+\end{frame}
+
+% -----------------------------------------------
+\begin{frame}{Architecture}
+  \begin{itemize}
+    \item \textbf{\texttt{CLAUDE.md}} contains high-level guidance. CC reads this first every time (this is a default)
+    \item \textbf{Spec files} encode domain-specific conventions. They make agent behavior consistent, and are only read when a task requires them. CLAUDE.md points to these as necessary (I did this)
+    \item \textbf{\texttt{.mcp.json}} configures which external MCP tools are available. (this is a default)
+    \item \textbf{Separation of concerns:} Obsidian vault is separate (MCP only). Zotero exports are read-only; changes to Zotero go through MCP. Each LaTeX project is its own repo.
+  \end{itemize}
+
+  \vspace{1em}
+  \textbf{Workflow loop:}
+  \begin{enumerate}
+    \item Tell the agent what you need (natural language).
+    \item Agent reads relevant specs, uses MCP tools, edits files.
+    \item You review, iterate, push to GitHub/Overleaf/Google Docs when ready.
+  \end{enumerate}
+\end{frame}
+
+% -----------------------------------------------
+\begin{frame}[fragile]{Architecture --- Live Setup}
+  \textbf{Option A --- do it yourself:}
+  \begin{enumerate}
+    \item Create the directories (terminal or VS Code file explorer):
+\begin{verbatim}
+mkdir projects
+mkdir zotero
+mkdir zotero/exports
+mkdir implementation
+\end{verbatim}
+    \item Create \texttt{CLAUDE.md} in the root --- describe what's here, your key rules, and a table pointing to spec files.
+    \item Create at least one spec file (e.g., \texttt{OBSIDIAN\_SPEC.md}) --- describe your conventions for that tool.
+    \item Create \texttt{PROJECTS.md} --- add one project entry with tag, status, description.
+    \item Create \texttt{.mcp.json} --- we'll fill this in next.
+  \end{enumerate}
+\end{frame}
+
+% -----------------------------------------------
+\begin{frame}[fragile]{Architecture --- Live Setup (cont.)}
+  \textbf{Option B --- let Claude do it.} Copy-paste this into Claude Code:
+
+\begin{verbatim}
+Set up this folder as a research workspace. Create:
+1. Directories: projects/, zotero/exports/, implementation/
+2. A CLAUDE.md with basic agent instructions for a research
+   workspace that uses Obsidian for notes, Zotero for
+   references, LaTeX for papers, and Google Docs for
+   collaborative writing. Include key rules and a table of
+   specs pointing to the spec files below.
+3. An OBSIDIAN_SPEC.md with a basic vault structure, note
+   classification decision tree, and frontmatter template.
+4. A LATEX_SPEC.md with conventions for academic writing and
+   a citation workflow.
+5. A PROJECTS_SPEC.md defining the format for project entries.
+6. A PROJECTS.md with one example project entry.
+7. A .mcp.json with placeholder entries for obsidian, zotero,
+   and google-docs-mcp servers.
+\end{verbatim}
+
+  \textbf{Option C:} Clone the template repo (link at the end) which has all of this pre-built.
+\end{frame}
+
+% ===============================================
+% 4. The Four Tools
+% ===============================================
+\agenda{4}
+
+\begin{frame}{Tool: Obsidian --- Local-First Knowledge Base}
+  Markdown-based note-taking app. Notes, meeting logs, paper summaries, project planning.
+
+  \vspace{0.5em}
+  \textbf{MCP server:} \texttt{@mauricio.wolff/mcp-obsidian}
+  \begin{itemize}
+    \item Zero dependencies, no Obsidian plugins needed
+    \item Requires: Node.js / npm
+    \item Install \& run: \texttt{npx @mauricio.wolff/mcp-obsidian@latest /path/to/vault}
+  \end{itemize}
+
+  \vspace{0.5em}
+  \textbf{Agent capabilities:} read, write, search, move, and delete notes; manage frontmatter and tags; batch operations; vault statistics.
+\end{frame}
+
+% -----------------------------------------------
+\begin{frame}{Tool: Obsidian --- How I Use It}
+  \begin{itemize}
+    \item I don't make good use of Obsidian's core feature, note interlinking. Seen some wizards with it though.
+    \item I like it as a \emph{Zettelkasten}: just create a new note and start typing, think about filing and context later.
+    \item A classification decision tree in \texttt{OBSIDIAN\_SPEC.md} lets the agent know how to handle each note type. I occasionally just go ``classify all my obsidian notes according to the instructions.''
+    \item AGENT-TODO markers: I leave tasks in notes, marked by ``AGENT-TODO'', that the agent executes during vault cleaning --- updating todos, searching for stuff someone mentioned, cleaning up messy meeting notes, etc.
+  \end{itemize}
+\end{frame}
+
+% -----------------------------------------------
+\begin{frame}{Tool: Zotero --- Reference Management}
+  Open-source reference manager. Stores papers, metadata, annotations, full text.
+
+  \vspace{0.5em}
+  \textbf{MCP server:} \texttt{zotero-mcp}
+  \begin{itemize}
+    \item Python-based, uses the cloud API or the local one (communicates with Zotero on your PC). Not much difference: Zotero syncs your library to the cloud anyway.
+    \item Requires: Python 3.10+ and uv
+    \item Install: \texttt{uv tool install "git+https://github.com/54yyyu/zotero-mcp.git"}
+    \item Credentials: API key + library ID from zotero.org/settings/keys
+  \end{itemize}
+
+  \vspace{0.5em}
+  \textbf{Agent capabilities:} keyword search, advanced multi-criteria search, \textbf{semantic search} (AI embeddings); read metadata, full text, annotations; manage tags, collections, notes.
+\end{frame}
+
+% -----------------------------------------------
+\begin{frame}{Tool: Zotero --- How I Use It}
+  \begin{itemize}
+    \item Everything I want to cite and most stuff I read goes in Zotero --- mostly academic, but also substacks, reports, etc.
+    \item I try to read and annotate in Zotero, because those annotations are also accessible via MCP.
+    \item Zotero is basically a wrapper around a .bib file, which is great because those can be used in LaTeX.
+    \item I have an export of my entire Zotero library in \texttt{zotero/} as fast local context for the agent, in addition to the MCP access.
+    \item What I actually use it for: (a) adding references to documents/papers, and (b) having Claude Code clean up my Zotero --- tag and file papers, etc.
+    \item \textbf{Semantic search} is the killer feature: ``find papers about democratic legitimacy of algorithmic decision-making'' works even if those exact words aren't in any title.
+    \item I have a \texttt{check\_citations.py} script to avoid hallucinations: after every addition of citations to a LaTeX doc, Claude Code runs that deterministic script to confirm they exist in my Zotero library and weren't made up.
+  \end{itemize}
+\end{frame}
+
+% -----------------------------------------------
+\begin{frame}{Tool: LaTeX \& Overleaf --- Academic Writing}
+  LaTeX for typesetting; Overleaf for collaborative cloud editing.
+
+  \vspace{0.5em}
+  \textbf{No dedicated MCP server needed} --- Claude Code's built-in file editing + git tools handle everything.
+
+  \vspace{0.5em}
+  Requires a local LaTeX distribution (e.g., TeX Live, MiKTeX) to compile locally (sort of a mess), or just compile on Overleaf.
+
+  \vspace{0.5em}
+  \textbf{Workflow:} Each paper is its own git repo under \texttt{projects/}. Git syncs to GitHub $\rightarrow$ Overleaf pulls from GitHub. Always fetch/pull before starting work.
+
+  \vspace{0.5em}
+  \textbf{Agent capabilities:} Mostly just editing files. The value is in all these files being in one context.
+\end{frame}
+
+% -----------------------------------------------
+\begin{frame}{Tool: LaTeX \& Overleaf --- How I Use It}
+  \begin{itemize}
+    \item Before, I would write in Overleaf (google docs for latex basically). Now, I write locally
+    \item \texttt{LATEX\_SPEC.md} encodes writing conventions, build instructions, citation workflow
+    \item Each project has its own \texttt{.bib} (curated), distinct from the full Zotero export
+  \end{itemize}
+\end{frame}
+
+% -----------------------------------------------
+\begin{frame}{Tool: Google Docs --- Collaborative Documents}
+  \textbf{MCP server:} \texttt{google-docs-mcp}
+  \begin{itemize}
+    \item Node.js-based
+    \item Requires: Node.js / npm, a Google Cloud project with OAuth credentials
+    \item Most complex setup of the four (Google Cloud Console $\rightarrow$ new project $\rightarrow$ enable Docs \& Drive APIs $\rightarrow$ OAuth consent screen $\rightarrow$ create credentials $\rightarrow$ download JSON), but instructions in the repo are really good.
+  \end{itemize}
+
+  \vspace{0.5em}
+  \textbf{Agent capabilities:} read documents (plain text, markdown, or raw JSON with character indices); insert, delete, and replace text; apply formatting; manage comments; insert tables and images; work with Google Sheets.
+\end{frame}
+
+% -----------------------------------------------
+\begin{frame}{Tool: Google Docs --- How I Use It}
+  \textbf{Hard-won lesson:} \texttt{replaceDocumentWithMarkdown} wipes all comments. For existing docs, always use surgical tools (\texttt{insertText}, \texttt{deleteRange}, \texttt{applyTextStyle}).
+
+  \vspace{1em}
+  \textbf{How I use it:}
+  \begin{itemize}
+    \item Not really established yet, but I don't think I like using Google Docs as a main working location.
+    \item A hard limitation is the
+    \item Instead, I create \textbf{local markdown files} that I iterate on, then push changes to Google Docs when I'm ready. Google Docs are usually basically just .md files anyway.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Sidebar: Get comfortable with markdown!}
+  \begin{itemize}
+    \item Markdown files are everywhere: the claude.md and specs, every obsidian note. google docs are basically also markdown files (support copy from/paste to markdown)
+    \item Markdown files have incredibly intuitive formatting.
+    \item It's useful working on stuff right in this folder, where Claude has access to all context and can make line-level edits.
+  \end{itemize}
+\end{frame}
+% ===============================================
+% 5. Context Management & Setup
+% ===============================================
+\agenda{5}
+
+\begin{frame}{Managing Context --- CLAUDE.md and Specs}
+  The agent is only as good as the instructions you give it. But context is expensive --- every token of instruction costs time and money, and too much context makes the agent \emph{worse}, not better.
+
+  \vspace{0.5em}
+  \textbf{Principle: keep context minimal and layered.}
+  \begin{itemize}
+    \item \texttt{CLAUDE.md} is loaded automatically on every conversation. Keep it short: rules, pointers to specs, workspace layout.
+    \item Spec files (\texttt{LATEX\_SPEC.md}, \texttt{OBSIDIAN\_SPEC.md}, etc.) contain domain-specific detail. The agent reads them \emph{only when needed}.
+    \item \texttt{PROJECTS.md} is a lightweight registry --- just enough for the agent to know what exists and what's active.
+  \end{itemize}
+\end{frame}
+
+% -----------------------------------------------
+\begin{frame}{Managing Context --- Why This Matters}
+  \textbf{Why this matters:}
+  \begin{itemize}
+    \item If you put everything in CLAUDE.md, every task pays the cost of reading everything.
+    \item If you split into specs, a Zotero task only reads CLAUDE.md + the relevant spec. Much cheaper, much more focused.
+  \end{itemize}
+
+  \vspace{1em}
+  \textbf{What goes in CLAUDE.md:}
+  \begin{itemize}
+    \item Who the agent is and what this workspace is for (1--2 sentences)
+    \item Key rules (never fabricate citations, never overwrite exports, etc.)
+    \item Table of specs with what each covers
+    \item Workspace layout summary
+  \end{itemize}
+
+\end{frame}
+
+% -----------------------------------------------
+\begin{frame}{Managing Context --- What Goes in Specs}
+  \textbf{What goes in specs:}
+  \begin{itemize}
+    \item Detailed conventions (file naming, frontmatter format, citation workflow steps)
+    \item Tool-specific instructions (how to build, how to search, what to avoid)
+    \item Decision trees and templates
+  \end{itemize}
+\end{frame}
+
+% -----------------------------------------------
+\begin{frame}{Configuring MCP Servers}
+  \texttt{.mcp.json} is a list of MCP servers that lives in your workspace root. Claude Code reads it on startup. Each server entry has:
+  \begin{itemize}
+    \item \texttt{command} --- the executable to run (e.g., \texttt{node}, \texttt{uv}, \texttt{npx})
+    \item \texttt{args} --- command-line arguments
+    \item \texttt{env} --- environment variables (API keys, config values)
+  \end{itemize}
+
+  \vspace{0.5em}
+  Servers start automatically when Claude Code opens the workspace. But this assumes they're installed!
+\end{frame}
+
+% -----------------------------------------------
+\begin{frame}{Installation}
+  Installing a new MCP server can be a bit annoying, but instructions are usually great. You almost always just need two things installed:
+  \begin{itemize}
+    \item \textbf{Node.js} (which includes \texttt{npm} and \texttt{npx}) --- \url{https://nodejs.org/}
+    \item \textbf{Python + uv} --- \url{https://www.python.org/}, \url{https://docs.astral.sh/uv/}
+  \end{itemize}
+
+  \vspace{1em}
+  Then find the MCP server's GitHub repo and follow the detailed instructions there. That's it.
+\end{frame}
+
+% -----------------------------------------------
+\begin{frame}{Adding an MCP Server --- Step by Step}
+  This pattern applies for any server including the ones I use. Using Zotero as the example:
+  \begin{enumerate}
+    \item \textbf{Find it.} Search ``zotero MCP server'' $\rightarrow$ find the GitHub repo.
+    \item \textbf{Check prerequisites.} Zotero MCP needs Python 3.10+ and \texttt{uv}.
+    \item \textbf{Install the server.} This is just code that runs locally whenever Claude Code accesses the tool. Follow the server's own install instructions.
+    \item \textbf{Get credentials.} You'll usually need to prove you're allowed to access the service.
+    \begin{itemize}
+      \item zotero.org $\rightarrow$ Settings $\rightarrow$ Feeds/API $\rightarrow$ Create new API key (read/write access)
+      \item Note your Library ID (in URL: \texttt{zotero.org/users/XXXXX/})
+    \end{itemize}
+  \end{enumerate}
+\end{frame}
+
+% -----------------------------------------------
+\begin{frame}[fragile]{Adding an MCP Server --- Step by Step (cont.)}
+  \begin{enumerate}
+    \setcounter{enumi}{4}
+    \item \textbf{Add to \texttt{.mcp.json}:}
+\begin{verbatim}
+"zotero": {
+  "command": "uv",
+  "args": ["run", "zotero-mcp"],
+  "env": {
+    "ZOTERO_LOCAL": "false",
+    "ZOTERO_API_KEY": "your-key",
+    "ZOTERO_LIBRARY_ID": "your-id"
+  }
+}
+\end{verbatim}
+    \item \textbf{Restart Claude Code} (close and reopen the panel, or restart VS Code).
+    \item \textbf{Test it.} Ask Claude: ``Search my Zotero library for papers about [topic].'' In the terminal CLI, type \texttt{/mcp} to see connected servers.
+    \item \textbf{Discover capabilities.} Ask Claude: ``What Zotero tools do you have access to? List them all with a one-line description.''
+    \item \textbf{Write your spec.} Encode your conventions (e.g., ``Zotero is canonical for references; never fabricate citekeys; always verify with the check script'').
+  \end{enumerate}
+
+  \vspace{0.5em}
+  This same pattern works for any MCP server. The ecosystem is growing fast --- check \url{https://modelcontextprotocol.io} for what's available.
+\end{frame}
+
+% ===============================================
+% Getting Started & Takeaways
+% ===============================================
+\agenda{6}
+\begin{frame}{Getting Started}
+  I think you should start small and build up your workspace yourself:
+  \begin{enumerate}
+    \item Install Claude Code $\rightarrow$ create a \texttt{research} workspace with a \texttt{CLAUDE.md} (you are here!)
+    \item Add one MCP server for the tool you use most (one of mine, or e.g. Notion, Email, ...)
+    \item Write a spec for your conventions in using that tool
+    \item Iterate: add servers, refine instructions, build habits, dump what doesn't work
+  \end{enumerate}
+
+  \vspace{1em}
+  \textbf{Template repo:} Alternatively, just use my template and follow the instructions to set my exact workspace up: github.com/YOUR-USERNAME/research-workspace-template
+\end{frame}
+
+% -----------------------------------------------
+\begin{frame}{Takeaways}
+  \begin{itemize}
+    \item My setup isn't so important. What matters is (a) giving an agent like Claude Code lots of context and (b) managing how it navigates it.
+    \item You do those via (a) rich folders and MCP, and (b) specs and CLAUDE.md.
+    \item To set up an MCP server, you need (a) the ``program to interface with'' either locally (obsidian) or online (google docs), (b) the ``wrapper''/thing to execute/MCP server itself (usually a git repo you download into another folder), and (c) the MCP server's entry into your repo's .mcp.json
+    \item Sounds complicated but usually you do this by (a) installing that program and (b) finding the MCP server's git repo and following the instructions there!
+  \end{itemize}
+\end{frame}
+
+% -----------------------------------------------
+\begin{frame}{Links}
+  \begin{itemize}
+    \item Google Docs MCP: \url{https://github.com/a-bonus/google-docs-mcp}
+    \item Obsidian MCP: \url{https://github.com/bitbonsai/mcp-obsidian}
+    \item Zotero MCP: \url{https://github.com/54yyyu/zotero-mcp}
+    \item Claude Code docs: \url{https://docs.anthropic.com/en/docs/claude-code}
+    \item MCP specification: \url{https://modelcontextprotocol.io}
+    \item uv (Python package manager): \url{https://docs.astral.sh/uv/}
+  \end{itemize}
+\end{frame}
+
+\end{document}

@@ -1,0 +1,36 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+*.swp
+*.swo
+*~
+
+# Zotero exports are tracked but never manually edited
+# (uncomment the next line if you don't want to track them in git)
+# zotero/exports/
+
+# LaTeX build artifacts (for projects that are git repos themselves)
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+*.lof
+*.lot
+*.run.xml
+*.bcf
+*.nav
+*.snm
+*.vrb
+
+# Python
+__pycache__/
+*.pyc
+.venv/

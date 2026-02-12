@@ -1,0 +1,41 @@
+{
+  "_comment": "MCP server configuration for Claude Code. Edit the paths and credentials below to match your setup. Remove any servers you don't use.",
+
+  "mcpServers": {
+
+    "obsidian": {
+      "_comment": "Obsidian MCP — edit the vault path to point to your Obsidian vault folder.",
+      "_requires": "Node.js (npm/npx). No separate install needed — npx downloads it on first run.",
+      "_setup": "https://github.com/bitbonsai/mcp-obsidian",
+      "command": "npx",
+      "args": [
+        "@mauricio.wolff/mcp-obsidian@latest",
+        "/EDIT-THIS/path/to/your/obsidian/vault"
+      ]
+    },
+
+    "zotero": {
+      "_comment": "Zotero MCP — edit your API key and library ID. Get these from https://www.zotero.org/settings/keys",
+      "_requires": "Python 3.10+ and uv. Install uv: https://docs.astral.sh/uv/getting-started/installation/",
+      "_setup": "https://github.com/54yyyu/zotero-mcp — install with: uv tool install \"git+https://github.com/54yyyu/zotero-mcp.git\"",
+      "command": "uv",
+      "args": ["run", "zotero-mcp"],
+      "env": {
+        "ZOTERO_LOCAL": "false",
+        "ZOTERO_API_KEY": "EDIT-THIS-your-zotero-api-key",
+        "ZOTERO_LIBRARY_ID": "EDIT-THIS-your-library-id"
+      }
+    },
+
+    "google-docs-mcp": {
+      "_comment": "Google Docs MCP — edit the path to point to where you cloned and built the server.",
+      "_requires": "Node.js. Clone the repo, run 'npm install' and 'npm run build'.",
+      "_setup": "https://github.com/a-bonus/google-docs-mcp — also requires Google Cloud OAuth setup (see repo README).",
+      "command": "node",
+      "args": [
+        "/EDIT-THIS/path/to/google-docs-mcp/dist/server.js"
+      ],
+      "env": {}
+    }
+  }
+}
