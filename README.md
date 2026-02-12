@@ -1,13 +1,12 @@
 # AI-Assisted Research Workflows with Claude Code & MCP
 
-Materials for Chris Schmitz's workshop on setting up an AI-assisted academic research workspace using Claude Code and MCP (Model Context Protocol).
+Materials for my workshop on setting up an AI-assisted academic research workspace using Claude Code and MCP (Model Context Protocol).
 
 ## What's Here
 
 | Path | Description |
 |------|-------------|
-| [`talk-outline.md`](talk-outline.md) | Full talk outline with speaker notes |
-| [`presentation/`](presentation/) | LaTeX Beamer slides |
+| [`presentation/`](presentation/) | Slides |
 | [`research-workspace-template/`](research-workspace-template/) | Ready-to-use workspace template (copy this to get started) |
 
 ## The Template
